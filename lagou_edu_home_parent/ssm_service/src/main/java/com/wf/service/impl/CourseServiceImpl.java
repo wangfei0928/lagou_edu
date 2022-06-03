@@ -1,0 +1,101 @@
+package com.wf.service.impl;
+
+import com.wf.dao.CourseMapper;
+import com.wf.domain.Course;
+import com.wf.domain.CourseVO;
+import com.wf.domain.Teacher;
+import com.wf.service.CourseService;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class CourseServiceImpl implements CourseService {
+
+    @Autowired
+    private CourseMapper courseMapper ;
+
+
+
+    @Override
+    public List<Course> findCourseByCondition(CourseVO courseVO) {
+
+        List<Course> courseList = courseMapper.findCourseByCondition(courseVO);
+        return courseList;
+    }
+
+    @Override
+    public void saveCourseOrTeacher(CourseVO courseVO) throws InvocationTargetException, IllegalAccessException {
+        //封装课程信息
+        Course course = new Course();
+
+        BeanUtils.copyProperties(course,courseVO);
+
+        //补全课程信息
+        Date date = new Date();
+        course.setCreateTime(date);
+        course.setUpdateTime(date);
+
+        courseMapper.saveCourse(course);
+
+        //获取新插入数据id
+        int id =  course.getId();
+        //封装讲师信息
+        Teacher teacher = new Teacher();
+        BeanUtils.copyProperties(teacher,courseVO);
+        //补全信息
+        teacher.setCourseId(id);
+        teacher.setCreateTime(date);
+        teacher.setUpdateTime(date);
+        courseMapper.saveTeacher(teacher);
+
+
+    }
+
+    @Override
+    public CourseVO findCourseById(Integer id) {
+        return courseMapper.findCourseById(id);
+    }
+
+
+    @Override
+    public void updateCourseOrTeacher(CourseVO courseVO) throws InvocationTargetException, IllegalAccessException {
+
+        //封装课程信息
+        Course course = new Course();
+        BeanUtils.copyProperties(course,courseVO);
+
+        //补全信息
+        Date date = new Date();
+        course.setUpdateTime(date);
+
+        //更新课程
+        courseMapper.updateCourse(course);
+
+        //封装讲师信息
+        Teacher teacher = new Teacher();
+        BeanUtils.copyProperties(teacher,courseVO);
+
+        //补全信息
+        teacher.setUpdateTime(date);
+
+        //更新讲师信息
+        courseMapper.updateTeacher(teacher);
+    }
+
+    @Override
+    public void updateCourseStatus(Integer id, Integer status) {
+        //封装数据
+        Course course = new Course();
+        course.setId(id);
+        course.setStatus(status);
+        course.setUpdateTime(new Date());
+        //调用mapper
+        courseMapper.updateCourseStatus(course);
+    }
+}

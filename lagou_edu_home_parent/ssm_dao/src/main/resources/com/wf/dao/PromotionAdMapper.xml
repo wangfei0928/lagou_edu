@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wf.dao.PromotionAdMapper">
+
+    
+    <resultMap id="ad_space" type="com.wf.domain.PromotionAd">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"/>
+        <result property="spaceId" column="spaceId"/>
+        <result property="keyword" column="keyword"/>
+        <result property="htmlContent" column="htmlContent"/>
+        <result property="text" column="text"/>
+        <result property="link" column="link"/>
+        <result property="startTime" column="startTime"/>
+        <result property="endTime" column="endTime"/>
+        <result property="createTime" column="createTime"/>
+        <result property="updateTime" column="updateTime"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="img" column="img"/>
+
+        <association property="promotionSpace" select="com.wf.dao.PromotionSpaceMapper.findPromotionSpaceById" column="spaceId" javaType="com.wf.domain.PromotionSpace"></association>
+    </resultMap>
+    <!--分页查询广告信息-->
+    <select id="findAllPromotionByPage" resultMap="ad_space">
+        select * from promotion_ad
+    </select>
+
+    <!--新增广告-->
+    <insert id="savePromotionAd" parameterType="com.wf.domain.PromotionAd">
+        INSERT INTO promotion_ad
+        VALUES(
+               NULL,
+               #{name},
+               #{spaceId},
+               #{keyword},
+               #{htmlContent},
+               #{text},
+               #{link},
+               #{startTime},
+               #{endTime},
+               #{createTime},
+               #{updateTime},
+               #{status},
+               #{priority},
+               #{img});
+    </insert>
+
+    <!--更新广告-->
+    <update id="updatePromotionAd" parameterType="com.wf.domain.PromotionAd">
+        update promotion_ad
+        <trim prefix="SET" suffixOverrides=",">
+           <if test="name != null and name != ''">
+             name = #{name},
+           </if>
+           <if test="spaceId != null and spaceId != ''">
+            spaceId = #{spaceId},
+            </if>
+            <if test="link != null">
+            link=#{link},
+            </if>
+            <if test="status != null and status != '' or status == 0">
+            status=#{status},
+            </if>
+            <if test="img != null">
+            img=#{img},
+            </if>
+            <if test="text != null">
+            text=#{text},
+            </if>
+            <if test="startTime != null">
+            startTime=#{startTime},
+            </if>
+            <if test="endTime != null">
+            endTime=#{endTime},
+            </if>
+            <if test="updateTime != null">
+            updateTime=#{updateTime},
+            </if>
+        </trim>
+        <where>
+            <if test="id != null and id != '' ">
+            id = #{id}
+            </if>
+        </where>
+    </update>
+
+    <!--修改广告状态-->
+    <update id="updatePromotionAdStatus" parameterType="com.wf.domain.PromotionAd">
+        UPDATE promotion_ad SET STATUS = #{status} ,updatetime = #{updateTime} WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC
+        "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wf.dao.CourseMapper">
+    <!--多条件课表查询-->
+    <select id="findCourseByCondition" parameterType="com.wf.domain.CourseVO" resultType="com.wf.domain.Course">
+        SELECT
+               *
+        FROM
+             course
+             <where>
+              <if test="true">
+               and is_del != 1
+               </if>
+               <if test="courseName != null and courseName != ''">
+                and course_name like concat('%',#{courseName},'%')
+               </if>
+               <if test="status != null and status !=''">
+                 and status = #{status}
+               </if>
+             </where>
+    </select>
+
+    <!--保存课程信息-->
+    <insert id="saveCourse" parameterType="com.wf.domain.Course">
+        INSERT INTO
+            course(
+                   course_name,
+                   brief,
+                   preview_first_field,
+                   preview_second_field,
+                   course_img_url,
+                   course_list_img,
+                   sort_num,
+                   price,
+                   discounts,
+                   sales,
+                   discounts_tag,
+                   course_description_mark_down,
+                   create_time,
+                   update_time
+                   )VALUES(#{courseName},#{brief},#{previewFirstField},#{previewSecondField},#{courseImgUrl},
+                           #{courseListImg},#{sortNum},#{price},#{discounts},#{sales},#{discountsTag},#{courseDescriptionMarkDown},
+                           #{createTime},#{updateTime});
+        <selectKey resultType="int" order="AFTER" keyProperty="id">
+            select LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <!--新增讲师-->
+    <insert id="saveTeacher" parameterType="com.wf.domain.Teacher">
+        INSERT INTO
+            teacher(
+                    course_id,
+                    teacher_name,
+                    POSITION,
+                    description,
+                    create_time,
+                    update_time
+                    ) VALUES(#{courseId},#{teacherName},#{position},#{description},#{createTime},#{updateTime});
+    </insert>
+
+    <!--通过id查询课程-->
+    <select id="findCourseById" parameterType="Integer" resultType="com.wf.domain.CourseVO">
+        SELECT
+               c.*,
+               t.teacher_name  teacher_name,
+               t.position      POSITINO,
+               t.description   description
+        FROM course c
+             LEFT JOIN teacher t
+                 ON c.id = t.course_id WHERE c.id = #{id}
+    </select>
+
+    <!--修改课程信息-->
+    <update id="updateCourse" parameterType="com.wf.domain.Course">
+        UPDATE course
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="courseName != null and courseName != ''">
+            course_name = #{courseName},
+            </if>
+            <if test="brief != null and brief != ''">
+            brief=#{brief},
+            </if>
+            <if test="previewFirstField != null and previewFirstField != ''">
+            preview_first_field=#{previewFirstField},
+            </if>
+            <if test="previewSecondField != null and previewSecondField != ''">
+            preview_second_field=#{previewSecondField},
+            </if>
+            <if test="courseImgUrl != null and courseImgUrl != ''">
+            course_img_url=#{courseImgUrl},
+            </if>
+            <if test="courseListImg != null and courseListImg != ''">
+            course_list_img=#{courseListImg},
+            </if>
+            <if test="sortNum != null and sortNum != ''">
+            sort_num=#{sortNum},
+            </if>
+            <if test="price != null and price != ''">
+            price=#{price},
+            </if>
+            <if test="discounts != null and discounts != ''">
+            discounts=#{discounts},
+            </if>
+            <if test="sales != null and sales != '' or sales==0">
+            sales=#{sales},
+            </if>
+            <if test="discountsTag != null and discountsTag != ''">
+            discounts_tag=#{discountsTag},
+            </if>
+            <if test="courseDescriptionMarkDown != null and courseDescriptionMarkDown != ''">
+            course_description_mark_down=#{courseDescriptionMarkDown},
+            </if>
+            <if test="updateTime != null">
+            update_time=#{updateTime},
+            </if>
+        </trim>
+        <where>
+            <if test="id!=null and id != '' ">
+            id=#{id}
+            </if>
+        </where>
+    </update>
+
+    <!--更新讲师信息-->
+    <update id="updateTeacher" parameterType="com.wf.domain.Teacher">
+        UPDATE teacher
+         <trim prefix="SET" suffixOverrides=",">
+             <if test="teacherName != null and teacherName != ''">
+            teacher_name = #{teacherName},
+            </if>
+            <if test="position != null and position != ''">
+            position = #{position},
+            </if>
+             <if test="description != null and description != ''">
+            description = #{description},
+            </if>
+             <if test="updateTime != null">
+            update_time=#{updateTime}
+            </if>
+         </trim>
+        <where>
+            <if test="courseId != null and courseId != '' ">
+            course_id = #{courseId}
+            </if>
+        </where>
+    </update>
+
+    <!--课程状态管理配置-->
+    <update id="updateCourseStatus" parameterType="com.wf.domain.Course">
+        update course set status = #{status} ,update_time = #{updateTime} where id=#{id}
+    </update>
+
+</mapper>
